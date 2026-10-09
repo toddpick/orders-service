@@ -1,0 +1,44 @@
+{
+  "eventId": "6f1c2d54-3b7a-4e0e-9c55-0d2a8f6b7e31",
+  "eventType": "OrderPacked",
+  "topic": "orders.order-packed.v1",
+  "occurredAt": "2026-10-05T09:48:13Z",
+  "payload": {
+    "orderNumber": "ORD-2026-004817",
+    "packedAt": "2026-10-05T09:48:12Z",
+    "customer": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@example.com",
+      "phone": "+15555550142"
+    },
+    "shipTo": {
+      "addressText": "14 Alder Court\nApt 3B\nMarlow Heights, OH",
+      "postalCode": "44118",
+      "countryCode": "US"
+    },
+    "items": [
+      {
+        "sku": "SKU-10052",
+        "description": "Hand-blown glass vase",
+        "quantity": 2,
+        "unitWeightLb": 5.1,
+        "dimensionsIn": { "l": 7, "w": 7, "h": 14 },
+        "handlingCodes": ["FRAGILE", "HIGH_VALUE"]
+      },
+      {
+        "sku": "SKU-10078",
+        "description": "Cast iron skillet 10 in",
+        "quantity": 1,
+        "unitWeightLb": 4.8,
+        "dimensionsIn": { "l": 16, "w": 10, "h": 2.5 },
+        "handlingCodes": []
+      }
+    ],
+    "totalWeightLb": 15,
+    "totalValueCents": 61800,
+    "currency": "USD",
+    "promisedDeliveryDate": "2026-10-09",
+    "deliveryPreference": "EVENING",
+    "requiresSignature": true
+  }
+}

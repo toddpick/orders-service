@@ -1,0 +1,38 @@
+{
+  "orderNumber": "ORD-2026-004903",
+  "status": "PICKING",
+  "createdAt": "2026-10-06T08:02:55Z",
+  "paidAt": "2026-10-06T08:03:40Z",
+  "customer": {
+    "fullName": "Sam Patel",
+    "email": "sam.patel@example.com"
+  },
+  "shipTo": {
+    "addressText": "902 Quarry Lane\nFernbrook, PA",
+    "postalCode": "19088",
+    "countryCode": "US"
+  },
+  "items": [
+    {
+      "sku": "SKU-10047",
+      "description": "Citrus all-purpose cleaner 32 fl oz",
+      "quantity": 3,
+      "unitWeightLb": 2.2,
+      "dimensionsIn": { "l": 3.5, "w": 3.5, "h": 10 },
+      "handlingCodes": ["HAZMAT_CLASS_3", "KEEP_UPRIGHT"]
+    },
+    {
+      "sku": "SKU-10085",
+      "description": "Lavender sachet set",
+      "quantity": 1,
+      "unitWeightLb": 0.56,
+      "dimensionsIn": { "l": 5, "w": 5, "h": 2 },
+      "handlingCodes": []
+    }
+  ],
+  "totalValueCents": 5497,
+  "currency": "USD",
+  "promisedDeliveryDate": "2026-10-12",
+  "deliveryPreference": "STANDARD",
+  "shipmentId": null
+}
