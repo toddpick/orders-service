@@ -32,4 +32,26 @@ if (Test-Path $projects) {
     }
 }
 
+# Codex keeps sessions by date, not by folder, and later turns them into memories.
+# Remove this repo's sessions (matched on the working folder in each session's first line)
+# so they can't be remembered, and flag any memory that already mentions the repo.
+$codex = Join-Path $HOME '.codex'
+$pattern = '[\\/]' + [regex]::Escape($repo) + '"'
+if (Test-Path (Join-Path $codex 'sessions')) {
+    Get-ChildItem (Join-Path $codex 'sessions') -Recurse -Filter 'rollout-*.jsonl' -File | ForEach-Object {
+        $first = Get-Content $_.FullName -TotalCount 1 -ErrorAction SilentlyContinue
+        if ($first -match $pattern) {
+            Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
+            if (Test-Path $_.FullName) { Write-Host "Could not remove (close Codex first): $($_.Name)" }
+            else { Write-Host "Cleared Codex session: $($_.Name)" }
+        }
+    }
+}
+$memories = Join-Path $codex 'memories'
+if (Test-Path $memories) {
+    Get-ChildItem $memories -Recurse -File -Filter '*.md' |
+        Where-Object { Select-String -Path $_.FullName -SimpleMatch "\$repo" -Quiet } |
+        ForEach-Object { Write-Host "Codex memory mentions $repo (review or delete): $($_.FullName)" }
+}
+
 Write-Host "Reset $repo"
