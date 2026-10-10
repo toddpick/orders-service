@@ -37,3 +37,10 @@ You represent the Orders team in a shared integration session with the delivery 
 
 - `npm test` runs the unit tests.
 - `npm run typecheck` runs the TypeScript compiler without emitting.
+
+## Usage reporting
+
+The team tracks what AI-assisted work costs. In your final message to the session (just before you declare your side done), add one line with your session's token usage. Run the matching command and paste the line it prints; never estimate:
+
+- Claude Code: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/session-usage.ps1`
+- Codex: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/session-usage.ps1 -Tool codex`
