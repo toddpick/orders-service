@@ -5,10 +5,12 @@
 # Usage:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File scripts/session-usage.ps1              # Claude Code
 #   powershell -NoProfile -ExecutionPolicy Bypass -File scripts/session-usage.ps1 -Tool codex  # Codex
+# Add -Json to print the totals as JSON (the shape a session's `done` usage takes).
 param(
     [ValidateSet('claude', 'codex')] [string] $Tool = 'claude',
     [string] $TranscriptPath,
-    [switch] $Compact
+    [switch] $Compact,
+    [switch] $Json
 )
 
 $ErrorActionPreference = 'Stop'
@@ -59,6 +61,7 @@ function Get-ClaudeUsage([string] $path) {
         $u.output += [double]$usage.output_tokens
     }
     $u.total = $u.input + $u.cacheWrite + $u.cacheRead + $u.output
+    $u.sessionId = [IO.Path]::GetFileNameWithoutExtension($path)
     return $u
 }
 
@@ -89,6 +92,11 @@ function Get-CodexUsage {
 if ($Tool -eq 'codex') {
     $u = Get-CodexUsage
     if (-not $u) { Write-Output 'Codex session usage: not found'; exit 0 }
+    if ($Json) {
+        [ordered]@{ tool = 'Codex'; input_tokens = [long]($u.input - $u.cached); output_tokens = [long]$u.output; cached_tokens = [long]$u.cached } |
+            ConvertTo-Json -Compress
+        exit 0
+    }
     Write-Output ('Codex session usage: {0} new input + {1} output tokens (plus {2} re-read from cache; output includes {3} reasoning)' -f
         (Format-Count ($u.input - $u.cached)), (Format-Count $u.output), (Format-Count $u.cached), (Format-Count $u.reasoning))
     exit 0
@@ -96,6 +104,14 @@ if ($Tool -eq 'codex') {
 
 $u = Get-ClaudeUsage $TranscriptPath
 if (-not $u) { Write-Output 'Claude Code session usage: not found'; exit 0 }
+if ($Json) {
+    $out = [ordered]@{ tool = 'Claude Code'; input_tokens = [long]($u.input + $u.cacheWrite); output_tokens = [long]$u.output; cached_tokens = [long]$u.cacheRead }
+    # Claude Code's own cost estimate, saved by the status line for this session.
+    $costFile = Join-Path $env:TEMP "claude-session-cost\$($u.sessionId).txt"
+    if (Test-Path $costFile) { $out.cost_usd = [math]::Round([double](Get-Content $costFile -TotalCount 1), 4) }
+    $out | ConvertTo-Json -Compress
+    exit 0
+}
 if ($Compact) {
     Write-Output ('in {0} / out {1} tokens (+{2} cached)' -f (Format-Count ($u.input + $u.cacheWrite)), (Format-Count $u.output), (Format-Count $u.cacheRead))
 } else {
