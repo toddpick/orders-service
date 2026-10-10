@@ -17,6 +17,14 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $repo = Split-Path -Leaf $root
 
+# Session files are still open in the tool that writes them, so read with full sharing.
+function Read-SharedLines([string] $path) {
+    $stream = [IO.FileStream]::new($path, [IO.FileMode]::Open, [IO.FileAccess]::Read,
+        [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete)
+    $reader = [IO.StreamReader]::new($stream)
+    try { while ($null -ne ($line = $reader.ReadLine())) { $line } } finally { $reader.Dispose() }
+}
+
 function Format-Count([double] $n) {
     if ($n -ge 1000000) { return ('{0:0.00}M' -f ($n / 1000000)) }
     if ($n -ge 1000) { return ('{0:0.0}k' -f ($n / 1000)) }
@@ -43,7 +51,7 @@ function Get-ClaudeUsage([string] $path) {
     # One API response is written as several lines sharing a message id, so keep one usage per id.
     $byId = @{}
     foreach ($file in $files) {
-        foreach ($line in [IO.File]::ReadLines($file)) {
+        foreach ($line in (Read-SharedLines $file)) {
             if ($line -notlike '*"usage"*') { continue }
             try { $entry = $line | ConvertFrom-Json } catch { continue }
             $msg = $entry.message
@@ -72,10 +80,10 @@ function Get-CodexUsage {
     $candidates = Get-ChildItem $sessions -Recurse -Filter 'rollout-*.jsonl' -File |
         Sort-Object LastWriteTime -Descending | Select-Object -First 20
     foreach ($file in $candidates) {
-        $first = Get-Content $file.FullName -TotalCount 1
+        $first = Read-SharedLines $file.FullName | Select-Object -First 1
         if ($first -notlike "*$repo*") { continue }
         $last = $null
-        foreach ($line in [IO.File]::ReadLines($file.FullName)) {
+        foreach ($line in (Read-SharedLines $file.FullName)) {
             if ($line -like '*"total_token_usage"*') { $last = $line }
         }
         if (-not $last) { return $null }
